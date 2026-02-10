@@ -5,10 +5,10 @@ from pendulum import datetime
 from cosmos import DbtDag, ProjectConfig, ProfileConfig, ExecutionConfig
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 
-# Chemin absolu à l'intérieur du conteneur Astro
+# Absolute path inside the Astro container
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
 
-# Configuration de la connexion (utilise la DB Postgres par défaut d'Astro)
+# Connection configuration (uses the default Astro Postgres DB)
 profile_config = ProfileConfig(
     profile_name="default",
     target_name="dev",
@@ -21,7 +21,7 @@ profile_config = ProfileConfig(
 example_dbt_dag = DbtDag(
     project_config=ProjectConfig(DBT_PROJECT_PATH),
     profile_config=profile_config,
-    # Utilise l'exécutable dbt installé via ton Dockerfile ou requirements.txt
+    # Uses the dbt executable installed via your Dockerfile or requirements.txt
     execution_config=ExecutionConfig(
         dbt_executable_path=f"{os.getenv('AIRFLOW_HOME')}/dbt_venv/bin/dbt"
     ),

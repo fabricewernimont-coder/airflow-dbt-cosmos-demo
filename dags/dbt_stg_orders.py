@@ -4,7 +4,7 @@ from airflow import DAG
 from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, RenderConfig
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 
-# Chemin vers ton projet dbt
+# Path to your dbt project
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
 
 with DAG(
@@ -17,7 +17,7 @@ with DAG(
     dbt_sniper = DbtTaskGroup(
         project_config=ProjectConfig(DBT_PROJECT_PATH),
         operator_args={
-            "full_refresh": True, # On force le nettoyage pour être tranquille
+            "full_refresh": True, # Force refresh to ensure a clean state
         },
         profile_config=ProfileConfig(
             profile_name="jaffle_shop",
@@ -28,7 +28,7 @@ with DAG(
             ),
         ),
         render_config=RenderConfig(
-            # Sélection précise : juste ce modèle, pas de parents, pas d'enfants
+            # Precise selection: just this specific model, no parents or children
             select=["stg_orders"], 
         ),
     )

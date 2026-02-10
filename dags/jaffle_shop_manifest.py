@@ -4,11 +4,11 @@ from airflow.models import DAG
 from cosmos import DbtDag, ProjectConfig, ProfileConfig, ExecutionConfig
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 
-# 1. On définit les chemins vers le projet et le manifest
+# 1. Define paths to the dbt project and the manifest file
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
 MANIFEST_PATH = DBT_PROJECT_PATH / "target" / "manifest.json"
 
-# 2. Ta config de connexion (identique à l'autre DAG)
+# 2. Connection configuration (identical to your other DAGs)
 profile_config = ProfileConfig(
     profile_name="default",
     target_name="dev",
@@ -18,11 +18,11 @@ profile_config = ProfileConfig(
     ),
 )
 
-# 3. Le DAG version "Manifest"
+# 3. The "Manifest" version of the DAG
 jaffle_shop_manifest = DbtDag(
     project_config=ProjectConfig(
         DBT_PROJECT_PATH,
-        manifest_path=MANIFEST_PATH, # <-- C'EST LA CLÉ !
+        manifest_path=MANIFEST_PATH, # <-- THIS IS THE KEY!
     ),
     profile_config=profile_config,
     execution_config=ExecutionConfig(

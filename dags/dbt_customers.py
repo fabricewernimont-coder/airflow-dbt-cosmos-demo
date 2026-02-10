@@ -4,7 +4,7 @@ from airflow import DAG
 from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, RenderConfig
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 
-# Chemin vers ton projet dbt dans le conteneur Astro
+# Path to your dbt project within the Astro container
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
 
 with DAG(
@@ -17,7 +17,7 @@ with DAG(
     dbt_branch = DbtTaskGroup(
         project_config=ProjectConfig(DBT_PROJECT_PATH),
         operator_args={
-            "full_refresh": True, # Force le nettoyage des tables de backup existantes
+            "full_refresh": True, # Force cleanup of existing backup tables
         },
         profile_config=ProfileConfig(
             profile_name="jaffle_shop",
@@ -28,7 +28,7 @@ with DAG(
             ),
         ),
         render_config=RenderConfig(
-            # On se concentre uniquement sur la branche customers
+            # Focus exclusively on the customers branch and its upstream dependencies
             select=["+customers"], 
         ),
     )
