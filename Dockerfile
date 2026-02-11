@@ -17,4 +17,4 @@ RUN cd /usr/local/airflow/dbt/jaffle_shop && \
 # 4. Give ownership back to the 'astro' user
 RUN chown -R astro:astro /usr/local/airflow/dbt_venv /usr/local/airflow/dbt
 
-USER astro
+USER astro 
