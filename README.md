@@ -33,7 +33,17 @@ This project implements different orchestration strategies to suit various needs
 
 To maintain a clean workflow, we distinguish between the **Airflow Runtime** (Docker) and the **Development Tools** (Local Python).
 
-### 1. dbt Virtual Environment
+### 1. Airflow Environment Configuration (Mandatory)
+To automate the connection to the internal Postgres database, you need to add the connection string to your .env file. This avoids manual configuration in the Airflow UI and ensures the environment is "Plug & Play".
+
+* Open the .env file at the root of the project (created by Astro CLI).
+* Append the following lines:
+```bash
+# Airflow Connection for dbt Cosmos
+AIRFLOW_CONN_POSTGRES_DEFAULT='postgres://postgres:postgres@postgres:5432/postgres'
+```
+
+### 2. dbt Virtual Environment
 Ensure you have Python 3.10+ installed.
 
 ```bash
@@ -45,7 +55,7 @@ source dbt-env/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Essential dbt Commands
+### 3. Essential dbt Commands
 From within `dbt-env`, use these commands to manage your project:
 
 * **Seed**: `dbt seed --profiles-dir etc` (Uploads CSVs to Postgres)
