@@ -10,9 +10,9 @@ RUN python -m venv /usr/local/airflow/dbt_venv && \
 COPY dbt /usr/local/airflow/dbt
 
 # 3. Generate the manifest (The fix for your parsing errors)
-# We use the venv directly to compile
+# Generate the manifest without connecting to a live database
 RUN cd /usr/local/airflow/dbt/jaffle_shop && \
-    /usr/local/airflow/dbt_venv/bin/dbt compile --profiles-dir etc
+    /usr/local/airflow/dbt_venv/bin/dbt compile --parse-only
 
 # 4. Give ownership back to the 'astro' user
 RUN chown -R astro:astro /usr/local/airflow/dbt_venv /usr/local/airflow/dbt
