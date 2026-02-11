@@ -2,19 +2,15 @@ FROM astrocrpublic.azurecr.io/runtime:3.1-12
 
 USER root
 
-# 1. Create the venv using direct paths (more reliable in Docker)
+# Install system dependencies for Postgres
+RUN apt-get update && apt-get install -y libpq-dev
+
+# Create directory and copy dbt project
+RUN mkdir -p /usr/local/airflow/dbt
+COPY dbt /usr/local/airflow/dbt
+
+# Setup dbt virtual environment
 RUN python -m venv /usr/local/airflow/dbt_venv && \
     /usr/local/airflow/dbt_venv/bin/pip install --no-cache-dir dbt-postgres
 
-# 2. Copy the project
-COPY dbt /usr/local/airflow/dbt
-
-# 3. Generate the manifest (The fix for your parsing errors)
-# Generate the manifest by pointing to your local profile directory
-RUN cd /usr/local/airflow/dbt/jaffle_shop && \
-    /usr/local/airflow/dbt_venv/bin/dbt parse --profiles-dir etc
-
-# 4. Give ownership back to the 'astro' user
-RUN chown -R astro:astro /usr/local/airflow/dbt_venv /usr/local/airflow/dbt
-
-USER astro 
+USER astro

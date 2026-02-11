@@ -1,10 +1,10 @@
 from datetime import datetime
 from pathlib import Path
 from airflow import DAG
-from airflow.providers.postgres.operators.postgres import PostgresOperator # Add this
 from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, RenderConfig
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 
+# Path to your dbt project within the Astro container
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
 
 with DAG(
@@ -14,17 +14,12 @@ with DAG(
     catchup=False,
 ) as dag:
 
-    # 1. Pre-cleanup task to remove any zombie backup relations
-    cleanup_backups = PostgresOperator(
-        task_id="cleanup_dbt_backups",
-        postgres_conn_id="postgres_default",
-        sql="DROP TABLE IF EXISTS stg_orders__dbt_backup CASCADE; DROP VIEW IF EXISTS stg_orders__dbt_backup CASCADE;"
-    )
+    # La tâche de cleanup a été retirée. 
+    # Le paramètre full_refresh ci-dessous prend le relais pour le nettoyage.
 
-    # 2. Your dbt execution
     dbt_sniper = DbtTaskGroup(
         project_config=ProjectConfig(DBT_PROJECT_PATH),
-        operator_args={"full_refresh": True},
+        operator_args={"full_refresh": True}, # dbt gère le remplacement des tables proprement
         profile_config=ProfileConfig(
             profile_name="jaffle_shop",
             target_name="dev",
@@ -38,4 +33,4 @@ with DAG(
         ),
     )
 
-    cleanup_backups >> dbt_sniper
+    dbt_sniper

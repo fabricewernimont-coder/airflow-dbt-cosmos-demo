@@ -1,11 +1,10 @@
 from datetime import datetime
 from pathlib import Path
 from airflow import DAG
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 from cosmos import DbtTaskGroup, ProjectConfig, ProfileConfig, RenderConfig
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 
-# Path to your dbt project within the Astro container
+# Chemin vers ton projet dbt dans le conteneur Astro
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
 
 with DAG(
@@ -15,22 +14,12 @@ with DAG(
     catchup=False,
 ) as dag:
 
-    # Pre-cleanup: Drops potential zombie relations for the customers branch
-    # This ensures your demo never gets stuck on "relation already exists"
-    pre_cleanup = PostgresOperator(
-        task_id="pre_dbt_cleanup",
-        postgres_conn_id="postgres_default",
-        sql="""
-            DROP VIEW IF EXISTS customers, stg_customers, stg_orders, raw_customers, raw_orders, raw_payments CASCADE;
-            DROP TABLE IF EXISTS customers, stg_customers, stg_orders, raw_customers, raw_orders, raw_payments CASCADE;
-            DROP TABLE IF EXISTS customers__dbt_backup, stg_customers__dbt_backup, stg_orders__dbt_backup CASCADE;
-        """
-    )
-
+    # On retire complètement la tâche pre_cleanup
+    
     dbt_branch = DbtTaskGroup(
         project_config=ProjectConfig(DBT_PROJECT_PATH),
         operator_args={
-            "full_refresh": True, 
+            "full_refresh": True, # On garde le full_refresh pour que dbt gère lui-même le nettoyage des tables
         },
         profile_config=ProfileConfig(
             profile_name="jaffle_shop",
@@ -45,4 +34,5 @@ with DAG(
         ),
     )
 
-    pre_cleanup >> dbt_branch
+    # La tâche s'exécute maintenant seule, sans dépendance cassée
+    dbt_branch
