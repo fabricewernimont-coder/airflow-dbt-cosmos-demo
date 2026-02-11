@@ -15,7 +15,7 @@ The repository is structured to separate data transformations (dbt) from orchest
 
 This project implements different orchestration strategies to suit various needs:
 
-### 1. jaffle_shop (Dynamic Mode)
+### 1. jaffle_shop_cosmos (Dynamic Mode)
 * **How it works**: Scans the `models/` folder at runtime.
 * **Best for**: Rapid development. Any SQL change is reflected instantly in Airflow.
 
@@ -24,8 +24,8 @@ This project implements different orchestration strategies to suit various needs
 * **Best for**: Production environments. It provides faster parsing and absolute consistency.
 
 ### 3. Granular Control on dbt & Data-Awareness
-* **dbt_customers & dbt_stg_orders**: Demonstrate how to isolate and run specific dbt models or groups.
-* **test_assets**: Showcases **Data-Aware Scheduling**. This DAG triggers automatically when the postgres `customers` table is updated using airflow assets.
+* **dbt_segment_customers & dbt_only_stg_orders**: Demonstrate how to isolate and run specific dbt models or groups.
+* **downstream_asset_check**: Showcases **Data-Aware Scheduling**. This DAG triggers automatically when the postgres `customers` table is updated airflow assets.
 
 ---
 
