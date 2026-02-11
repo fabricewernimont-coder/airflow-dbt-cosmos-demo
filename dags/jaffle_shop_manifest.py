@@ -34,7 +34,7 @@ jaffle_shop_manifest = DbtDag(
         "full_refresh": True, # Added to prevent the Postgres relation errors we saw earlier
     },
     # FIX: Changed schedule_interval to schedule
-    schedule="@daily", 
+    schedule="@daily",  
     start_date=datetime(2023, 1, 1),
     catchup=False,
     dag_id="jaffle_shop_manifest",
