@@ -8,7 +8,7 @@ from cosmos.profiles import PostgresUserPasswordProfileMapping
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
 MANIFEST_PATH = DBT_PROJECT_PATH / "target" / "manifest.json"
 
-# 2. Connection configuration (identical to your other DAGs)
+# 2. Connection configuration
 profile_config = ProfileConfig(
     profile_name="default",
     target_name="dev",
@@ -22,16 +22,19 @@ profile_config = ProfileConfig(
 jaffle_shop_manifest = DbtDag(
     project_config=ProjectConfig(
         DBT_PROJECT_PATH,
-        manifest_path=MANIFEST_PATH, # <-- THIS IS THE KEY!
+        manifest_path=MANIFEST_PATH,
     ),
     profile_config=profile_config,
     execution_config=ExecutionConfig(
+        # Double check this path exists in your Docker container!
         dbt_executable_path="/usr/local/airflow/dbt-env/bin/dbt",
     ),
     operator_args={
         "install_deps": True,
+        "full_refresh": True, # Added to prevent the Postgres relation errors we saw earlier
     },
-    schedule_interval="@daily",
+    # FIX: Changed schedule_interval to schedule
+    schedule="@daily", 
     start_date=datetime(2023, 1, 1),
     catchup=False,
     dag_id="jaffle_shop_manifest",
