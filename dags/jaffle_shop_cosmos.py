@@ -17,7 +17,7 @@ profile_config = ProfileConfig(
     )
 )
 
-example_dbt_dag = DbtDag(
+jaffle_shop_cosmos = DbtDag(
     project_config=ProjectConfig(DBT_PROJECT_PATH),
     profile_config=profile_config,
     # Isolation: Uses the dbt virtual environment built in the Dockerfile

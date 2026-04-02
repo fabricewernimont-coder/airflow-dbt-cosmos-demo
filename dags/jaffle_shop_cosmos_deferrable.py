@@ -15,7 +15,7 @@ profile_config = ProfileConfig(
     )
 )
 
-example_dbt_dag = DbtDag(
+jaffle_shop_cosmos_deferrable = DbtDag(
     project_config=ProjectConfig(DBT_PROJECT_PATH),
     profile_config=profile_config,
     execution_config=ExecutionConfig(
