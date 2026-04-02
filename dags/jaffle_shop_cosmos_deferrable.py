@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from pendulum import datetime
 from cosmos import DbtDag, ProjectConfig, ProfileConfig, ExecutionConfig, RenderConfig
+from cosmos.constants import InvocationMode
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
@@ -20,8 +21,10 @@ jaffle_shop_cosmos_deferrable = DbtDag(
     profile_config=profile_config,
     execution_config=ExecutionConfig(
         dbt_executable_path=f"{os.getenv('AIRFLOW_HOME')}/dbt_venv/bin/dbt",
-        # ✅ Switch to LocalExecutionMode.VIRTUALENV if you want process isolation,
-        # but for deferrable watcher mode, the default (LOCAL) works fine here.
+        # ✅ Force subprocess invocation — required for deferrable watcher mode.
+        # Without this, Cosmos auto-detects dbtRunner (in-process) which bypasses
+        # the subprocess watcher and silently ignores deferrable=True.
+        invocation_mode=InvocationMode.SUBPROCESS,
     ),
     render_config=RenderConfig(
         select=["path:models", "path:seeds"]
@@ -29,12 +32,11 @@ jaffle_shop_cosmos_deferrable = DbtDag(
     operator_args={
         "install_deps": True,
         "full_refresh": True,
-        # ✅ KEY: enables deferrable watcher mode
-        # The task submits the dbt process, then defers — freeing the worker slot
-        # while dbt runs. The Triggerer polls and resumes when dbt finishes.
+        # ✅ Enables deferrable watcher mode — task defers after subprocess launch,
+        # freeing the worker slot while dbt runs. Triggerer polls and resumes.
         "deferrable": True,
-        # ✅ Polling interval for the Triggerer (seconds). 
-        # Default is 5s — tune up if dbt models run long (e.g. 30s).
+        # ✅ How often the Triggerer checks if the subprocess finished.
+        # 5s is fine for fast models; increase to 30-60s for long warehouse transforms.
         "poll_interval": 5,
     },
     dag_id="jaffle_shop_cosmos_deferrable",
