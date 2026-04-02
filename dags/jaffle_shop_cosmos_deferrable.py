@@ -37,7 +37,7 @@ jaffle_shop_cosmos_deferrable = DbtDag(
         # Default is 5s — tune up if dbt models run long (e.g. 30s).
         "poll_interval": 5,
     },
-    dag_id="jaffle_shop_cosmos",
+    dag_id="jaffle_shop_cosmos_deferrable",
     start_date=datetime(2025, 1, 1),
     schedule="@daily",
     catchup=False,
