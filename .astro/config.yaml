@@ -1,2 +1,4 @@
+dev:
+    mode: docker
 project:
     name: airflow-cosmos

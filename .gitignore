@@ -13,3 +13,4 @@ dbt-env/
 **/dbt-env/
 dbt/jaffle_shop/target/*
 !dbt/jaffle_shop/target/.gitkeep
+.astro/standalone/
