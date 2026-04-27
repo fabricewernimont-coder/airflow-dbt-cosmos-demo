@@ -1,4 +1,4 @@
-FROM astrocrpublic.azurecr.io/runtime:3.2-2
+FROM astrocrpublic.azurecr.io/runtime:3.1-12
 
 USER root
 
