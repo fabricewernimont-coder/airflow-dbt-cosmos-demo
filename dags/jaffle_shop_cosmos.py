@@ -3,6 +3,7 @@ from pathlib import Path
 from pendulum import datetime
 from cosmos import DbtDag, ProjectConfig, ProfileConfig, ExecutionConfig, RenderConfig
 from cosmos.profiles import PostgresUserPasswordProfileMapping
+from airflow.sdk import Asset, task
 
 # Absolute path inside the Astro container
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
@@ -17,18 +18,17 @@ profile_config = ProfileConfig(
     )
 )
 
+pipeline_done = Asset("astro://jaffle_shop/pipeline/complete")
+
 jaffle_shop_cosmos = DbtDag(
     project_config=ProjectConfig(DBT_PROJECT_PATH),
     profile_config=profile_config,
-    # Isolation: Uses the dbt virtual environment built in the Dockerfile
     execution_config=ExecutionConfig(
         dbt_executable_path=f"{os.getenv('AIRFLOW_HOME')}/dbt_venv/bin/dbt"
     ),
-    # RenderConfig ensures that both seeds (CSVs) and models are included in the DAG
     render_config=RenderConfig(
         select=["path:models", "path:seeds"]
     ),
-    # Added install_deps to ensure dbt packages are ready
     operator_args={
         "install_deps": True,
         "full_refresh": True,
@@ -38,3 +38,11 @@ jaffle_shop_cosmos = DbtDag(
     schedule="@daily",
     catchup=False,
 )
+
+# Terminal task emits the pipeline_done asset after all models complete
+with jaffle_shop_cosmos:
+    @task(outlets=[pipeline_done])
+    def emit_pipeline_done():
+        print("All dbt models completed successfully — emitting pipeline asset.")
+
+    emit_pipeline_done()

@@ -1,9 +1,7 @@
 import os
 from pathlib import Path
 from pendulum import datetime
-from airflow.sdk import Asset, dag, task
 from cosmos import DbtDag, ProjectConfig, ProfileConfig, ExecutionConfig, RenderConfig
-from cosmos.constants import ExecutionMode
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 
 DBT_PROJECT_PATH = Path("/usr/local/airflow/dbt/jaffle_shop")
@@ -17,33 +15,22 @@ profile_config = ProfileConfig(
     )
 )
 
-pipeline_done = Asset("astro://jaffle_shop/pipeline/complete")
-
-jaffle_shop_cosmos_deferrable = DbtDag(
+# DAG that only runs models tagged "staging"
+jaffle_shop_staging = DbtDag(
+    dag_id="jaffle_shop_staging_only",
     project_config=ProjectConfig(DBT_PROJECT_PATH),
     profile_config=profile_config,
     execution_config=ExecutionConfig(
-        execution_mode=ExecutionMode.WATCHER,
-        dbt_executable_path=f"{os.getenv('AIRFLOW_HOME')}/dbt_venv/bin/dbt",
+        dbt_executable_path=f"{os.getenv('AIRFLOW_HOME')}/dbt_venv/bin/dbt"
     ),
     render_config=RenderConfig(
-        select=["path:models", "path:seeds"]
+        select=["tag:staging"],       # ← only models with tag: staging
     ),
     operator_args={
         "install_deps": True,
         "full_refresh": True,
     },
-    dag_id="jaffle_shop_cosmos_deferrable",
     start_date=datetime(2025, 1, 1),
     schedule="@daily",
     catchup=False,
 )
-
-# Add a terminal task that emits the pipeline_done asset
-# This task runs after all Cosmos tasks complete successfully
-with jaffle_shop_cosmos_deferrable:
-    @task(outlets=[pipeline_done])
-    def emit_pipeline_done():
-        print("All dbt models completed successfully — emitting pipeline asset.")
-
-    emit_pipeline_done()
